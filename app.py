@@ -2,7 +2,6 @@
 import base64          # used in Task 10: PNG download via Canvas API
 import datetime        # used in Task 10: auto-generated filename
 import streamlit as st
-import streamlit.components.v1 as components  # used in Task 10: inject PNG download JS
 
 from finger_svg import (
     COLORS, BG_COLORS, DEFAULT_COLOR,
