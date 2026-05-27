@@ -74,7 +74,9 @@ def apply_flip(svg_str: str) -> str:
 
 
 def decompose(n: int) -> list[int]:
-    """Decompose a number into hands (max 5 fingers per hand)."""
+    """Decompose a number into hands (max 5 fingers per hand). n must be >= 0."""
+    if n < 0:
+        raise ValueError(f"decompose expects n >= 0, got {n}")
     if n == 0:
         return [0]
     hands, remaining = [], n
