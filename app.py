@@ -83,4 +83,43 @@ with tab_manual:
             st.session_state.hands[i]["variant"] = variants[0]
             st.rerun()
 
+# ── 손별 설정 (방향 + 변형) ───────────────────────────────────
+if st.session_state.hands:
+    st.subheader("손 설정")
+    hand_cols = st.columns(len(st.session_state.hands))
+
+    for i, hand in enumerate(st.session_state.hands):
+        with hand_cols[i]:
+            st.markdown(f"**{i+1}번 손**")
+
+            # 방향 토글
+            dir_label = "오른손" if hand["flip"] else "왼손"
+            if st.button(dir_label, key=f"flip_{i}"):
+                st.session_state.hands[i]["flip"] = not hand["flip"]
+                st.rerun()
+
+            # 변형 썸네일 (2개 이상일 때만 표시)
+            variants = get_variants(hand["value"])
+            if len(variants) > 1:
+                st.caption("변형 선택")
+                thumb_cols = st.columns(len(variants))
+                color_hex = COLORS[st.session_state.color]
+                for j, variant in enumerate(variants):
+                    with thumb_cols[j]:
+                        # 썸네일용 단일 손 SVG (60x90 스케일)
+                        thumb_svg = build_svg(
+                            [{"value": hand["value"], "variant": variant,
+                              "color": color_hex, "flip": hand["flip"]}],
+                            bg_color="#F5F5F5",
+                        )
+                        border = "2px solid #333" if variant == hand["variant"] else "1px solid #ddd"
+                        st.markdown(
+                            f'<div style="border:{border};border-radius:4px;padding:2px;max-width:70px;overflow:hidden">'
+                            f'{thumb_svg}</div>',
+                            unsafe_allow_html=True,
+                        )
+                        if st.button(f"{'✓' if variant == hand['variant'] else '  '}", key=f"var_{i}_{j}"):
+                            st.session_state.hands[i]["variant"] = variant
+                            st.rerun()
+
 st.markdown("---")
