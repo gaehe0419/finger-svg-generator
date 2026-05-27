@@ -87,6 +87,7 @@ with tab_manual:
 if st.session_state.hands:
     st.subheader("손 설정")
     hand_cols = st.columns(len(st.session_state.hands))
+    color_hex = COLORS[st.session_state.color]  # global color — same for all hands
 
     for i, hand in enumerate(st.session_state.hands):
         with hand_cols[i]:
@@ -103,7 +104,6 @@ if st.session_state.hands:
             if len(variants) > 1:
                 st.caption("변형 선택")
                 thumb_cols = st.columns(len(variants))
-                color_hex = COLORS[st.session_state.color]
                 for j, variant in enumerate(variants):
                     with thumb_cols[j]:
                         # 썸네일용 단일 손 SVG (60x90 스케일)
