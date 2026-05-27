@@ -1,5 +1,10 @@
 # tests/conftest.py
+import sys
+import os
 import pytest
+
+# Add parent directory to sys.path so finger_svg can be imported
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 100×150 circle at #FFC6BD — matches finger-svg-generator spec dimensions and base color
 DUMMY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="150" viewBox="0 0 100 150"><circle cx="50" cy="75" r="40" fill="#FFC6BD"/></svg>'
