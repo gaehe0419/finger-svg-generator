@@ -45,3 +45,42 @@ def test_get_variants_multiple(comp_dir):
 def test_get_variants_missing_number_returns_a(comp_dir):
     fsvg = reload_module(comp_dir)
     assert fsvg.get_variants(9, comp_dir) == ["a"]
+
+
+def test_get_svg_dimensions_from_viewbox():
+    fsvg = reload_module("components")
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><circle/></svg>'
+    w, h = fsvg.get_svg_dimensions(svg)
+    assert w == 200.0
+    assert h == 300.0
+
+
+def test_get_svg_dimensions_from_width_height():
+    fsvg = reload_module("components")
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" width="150px" height="250px"><circle/></svg>'
+    w, h = fsvg.get_svg_dimensions(svg)
+    assert w == 150.0
+    assert h == 250.0
+
+
+def test_apply_color_replaces_base(comp_dir):
+    fsvg = reload_module(comp_dir)
+    svg = '<svg xmlns="http://www.w3.org/2000/svg"><circle fill="#FFC6BD"/></svg>'
+    result = fsvg.apply_color(svg, "#FF6666")
+    assert "#FF6666" in result
+    assert "#FFC6BD" not in result
+
+
+def test_apply_color_case_insensitive(comp_dir):
+    fsvg = reload_module(comp_dir)
+    svg = '<svg xmlns="http://www.w3.org/2000/svg"><circle fill="#ffc6bd"/></svg>'
+    result = fsvg.apply_color(svg, "#26C9CB")
+    assert "#26C9CB" in result
+    assert "#ffc6bd" not in result
+
+
+def test_apply_color_no_change_when_no_match(comp_dir):
+    fsvg = reload_module(comp_dir)
+    svg = '<svg xmlns="http://www.w3.org/2000/svg"><circle fill="#000000"/></svg>'
+    result = fsvg.apply_color(svg, "#FF6666")
+    assert "#000000" in result

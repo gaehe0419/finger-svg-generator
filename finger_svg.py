@@ -42,3 +42,19 @@ def get_variants(number: int, components_dir: str = COMPONENTS_DIR) -> list[str]
         if m:
             variants.append(m.group(1))
     return variants if variants else ["a"]
+
+
+def get_svg_dimensions(svg_str: str) -> tuple[float, float]:
+    root = ET.fromstring(svg_str)
+    vb = root.get("viewBox")
+    if vb:
+        parts = vb.strip().split()
+        return float(parts[2]), float(parts[3])
+    w = re.sub(r"[^\d.]", "", root.get("width", "100"))
+    h = re.sub(r"[^\d.]", "", root.get("height", "100"))
+    return float(w or "100"), float(h or "100")
+
+
+def apply_color(svg_str: str, target_color: str) -> str:
+    pattern = re.compile(re.escape(BASE_HAND_COLOR), re.IGNORECASE)
+    return pattern.sub(target_color, svg_str)
