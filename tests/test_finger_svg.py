@@ -1,5 +1,4 @@
 # tests/test_finger_svg.py
-import importlib
 import sys
 import os
 import pytest
