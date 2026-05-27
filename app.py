@@ -123,3 +123,70 @@ if st.session_state.hands:
                             st.rerun()
 
 st.markdown("---")
+
+# ── 미리보기 & 내보내기 ───────────────────────────────────────
+
+def make_filename(hands: list[dict]) -> str:
+    today = datetime.date.today().strftime("%Y%m%d")
+    values = "-".join(str(h["value"]) for h in hands)
+    return f"finger_{today}_{values}"
+
+
+def png_download_button(svg_str: str, filename: str, scale: int = 2) -> None:
+    """브라우저 Canvas API로 PNG 변환 후 다운로드."""
+    svg_b64 = base64.b64encode(svg_str.encode("utf-8")).decode()
+    btn_id = f"png_{abs(hash(svg_str)) % 100000}"
+    html = f"""
+    <button id="{btn_id}" style="background:#fff;border:1px solid #ccc;padding:4px 12px;border-radius:4px;cursor:pointer"
+      onclick="(function(){{
+        var data = atob('{svg_b64}');
+        var blob = new Blob([data], {{type:'image/svg+xml'}});
+        var url  = URL.createObjectURL(blob);
+        var img  = new Image();
+        img.onload = function(){{
+          var c = document.createElement('canvas');
+          c.width  = img.naturalWidth  * {scale};
+          c.height = img.naturalHeight * {scale};
+          var ctx = c.getContext('2d');
+          ctx.scale({scale},{scale});
+          ctx.drawImage(img,0,0);
+          var a = document.createElement('a');
+          a.download = '{filename}.png';
+          a.href = c.toDataURL('image/png');
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }};
+        img.src = url;
+      }})()">PNG 다운로드</button>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+
+
+if st.session_state.hands:
+    color_hex = COLORS[st.session_state.color]
+    bg_hex    = BG_COLORS[st.session_state.color]
+
+    hands_config = [
+        {"value": h["value"], "variant": h["variant"],
+         "color": color_hex, "flip": h["flip"]}
+        for h in st.session_state.hands
+    ]
+
+    svg_result = build_svg(hands_config, bg_color=bg_hex)
+    filename   = make_filename(st.session_state.hands)
+
+    st.subheader("미리보기")
+    st.markdown(svg_result, unsafe_allow_html=True)
+
+    dl_col1, dl_col2 = st.columns([1, 1])
+    with dl_col1:
+        st.download_button(
+            "SVG 다운로드",
+            data=svg_result,
+            file_name=f"{filename}.svg",
+            mime="image/svg+xml",
+        )
+    with dl_col2:
+        png_download_button(svg_result, filename)
+else:
+    st.info("숫자를 입력하거나 손을 추가하세요.")
