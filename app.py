@@ -28,7 +28,6 @@ with col_left:
 
     # 색상 버튼 CSS
     # 버튼 키를 color_0 ~ color_4 (인덱스)로 지정해야 st-key-color_0 등 고유 클래스가 생성됨.
-    # 한글 키(color_피부색)는 Streamlit이 비ASCII를 제거해 모두 st-key-color_---로 충돌.
     _TEXT_COLOR = {
         "피부색": "#555555",
         "흰색":   "#2F424E",
@@ -37,15 +36,19 @@ with col_left:
         "따미":   "#ffffff",
     }
     _css = "<style>"
+    # 버튼 행 gap 16px
+    _css += ".stHorizontalBlock:has(.st-key-color_0) { gap: 16px !important; }"
     for _i, (_name, _hex) in enumerate(COLORS.items()):
-        _sel = st.session_state.color == _name
-        _border = "3px solid #333333" if _sel else "1px solid #cccccc"
-        _tc = _TEXT_COLOR[_name]
+        _sel    = st.session_state.color == _name
+        _shadow = SHADOW_COLORS[_name]                          # 활성 테두리 = shadow color
+        _border = f"3px solid {_shadow}" if _sel else "1.5px solid #dddddd"
+        _tc     = _TEXT_COLOR[_name]
         _css += (
             f'.st-key-color_{_i} button {{'
             f'background-color:{_hex}!important;border:{_border}!important;'
             f'color:{_tc}!important;font-weight:700!important;'
-            f'min-height:52px!important;width:100%!important;border-radius:8px!important;}}'
+            f'min-height:44px!important;width:auto!important;'   # 가변 너비
+            f'padding:8px 18px!important;border-radius:8px!important;}}'
         )
     _css += "</style>"
     st.markdown(_css, unsafe_allow_html=True)
@@ -53,7 +56,7 @@ with col_left:
     color_cols = st.columns(len(COLORS))
     for i, (name, hex_val) in enumerate(COLORS.items()):
         with color_cols[i]:
-            if st.button(name, key=f"color_{i}", use_container_width=True):
+            if st.button(name, key=f"color_{i}"):               # use_container_width 제거
                 st.session_state.color = name
                 st.rerun()
 
