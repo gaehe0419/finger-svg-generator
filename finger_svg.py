@@ -58,3 +58,32 @@ def get_svg_dimensions(svg_str: str) -> tuple[float, float]:
 def apply_color(svg_str: str, target_color: str) -> str:
     pattern = re.compile(re.escape(BASE_HAND_COLOR), re.IGNORECASE)
     return pattern.sub(target_color, svg_str)
+
+
+def apply_flip(svg_str: str) -> str:
+    """Flip SVG horizontally by wrapping children in a <g> with scale(-1,1) and translate."""
+    w, _ = get_svg_dimensions(svg_str)
+    root = ET.fromstring(svg_str)
+    g = ET.Element(f"{{{SVG_NS}}}g")
+    g.set("transform", f"scale(-1,1) translate({-w:.4f},0)")
+    for child in list(root):
+        root.remove(child)
+        g.append(child)
+    root.append(g)
+    return ET.tostring(root, encoding="unicode")
+
+
+def decompose(n: int) -> list[int]:
+    """Decompose a number into hands (max 5 fingers per hand)."""
+    if n == 0:
+        return [0]
+    hands, remaining = [], n
+    while remaining > 0:
+        hands.append(min(5, remaining))
+        remaining -= 5
+    return hands
+
+
+def default_hand_directions(count: int) -> list[bool]:
+    """Generate default hand directions: even indices → True (right/flip), odd → False (left)."""
+    return [i % 2 == 0 for i in range(count)]
