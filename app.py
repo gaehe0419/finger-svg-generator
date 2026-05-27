@@ -26,16 +26,25 @@ col_left, col_right = st.columns([1, 2], gap="medium")
 with col_left:
     st.subheader("색상")
 
-    # 색상 버튼 CSS — 각 버튼 배경을 해당 색상으로 설정
+    # 색상 버튼 CSS
+    # 버튼 키를 color_0 ~ color_4 (인덱스)로 지정해야 st-key-color_0 등 고유 클래스가 생성됨.
+    # 한글 키(color_피부색)는 Streamlit이 비ASCII를 제거해 모두 st-key-color_---로 충돌.
+    _TEXT_COLOR = {
+        "피부색": "#555555",
+        "흰색":   "#2F424E",
+        "깨다":   "#ffffff",
+        "챌리":   "#555555",
+        "따미":   "#ffffff",
+    }
     _css = "<style>"
     for _i, (_name, _hex) in enumerate(COLORS.items()):
         _sel = st.session_state.color == _name
         _border = "3px solid #333333" if _sel else "1px solid #cccccc"
-        _tc = "#2F424E" if _hex == "#FFFFFF" else "#333333"
+        _tc = _TEXT_COLOR[_name]
         _css += (
-            f'[data-testid="stColumn"]:has([data-cbtn="{_i}"]) button {{'
+            f'.st-key-color_{_i} button {{'
             f'background-color:{_hex}!important;border:{_border}!important;'
-            f'color:{_tc}!important;font-weight:600!important;'
+            f'color:{_tc}!important;font-weight:700!important;'
             f'min-height:52px!important;width:100%!important;border-radius:8px!important;}}'
         )
     _css += "</style>"
@@ -44,8 +53,7 @@ with col_left:
     color_cols = st.columns(len(COLORS))
     for i, (name, hex_val) in enumerate(COLORS.items()):
         with color_cols[i]:
-            st.markdown(f'<span data-cbtn="{i}" style="display:none"></span>', unsafe_allow_html=True)
-            if st.button(name, key=f"color_{name}", use_container_width=True):
+            if st.button(name, key=f"color_{i}", use_container_width=True):
                 st.session_state.color = name
                 st.rerun()
 
