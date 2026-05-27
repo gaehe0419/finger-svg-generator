@@ -12,8 +12,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 COMPONENTS_DIR = "components"
 BASE_HAND_COLOR   = "#FFC6BD"  # 손 메인 색상 (cls-1)
 BASE_SHADOW_COLOR = "#f9897a"  # 손 그림자 색상 (cls-2)
-HAND_GAP = 20  # 손 사이 간격 (px)
-PADDING = 20  # 이미지 주변 여유 공간 (px)
+HAND_GAP = 40  # 손 사이 간격 (px)
 
 COLORS = {
     "피부색": "#FFC6BD",
@@ -148,30 +147,27 @@ def build_svg(
     widths  = [d[0] for d in dims]
     heights = [d[1] for d in dims]
     total_w = sum(widths) + HAND_GAP * (len(processed) - 1)
-    hand_h  = max(heights)
+    max_h   = max(heights)
 
-    # Add padding around all hands
-    bg_w = total_w + 2 * PADDING
-    bg_h = hand_h  + 2 * PADDING
-
+    # 여백 없이 타이트한 캔버스
     root = ET.Element(f"{{{SVG_NS}}}svg")
-    root.set("viewBox", f"0 0 {bg_w:.2f} {bg_h:.2f}")
-    root.set("width",   f"{bg_w:.2f}")
-    root.set("height",  f"{bg_h:.2f}")
+    root.set("viewBox", f"0 0 {total_w:.2f} {max_h:.2f}")
+    root.set("width",   f"{total_w:.2f}")
+    root.set("height",  f"{max_h:.2f}")
 
     bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
-    bg.set("width",  f"{bg_w:.2f}")
-    bg.set("height", f"{bg_h:.2f}")
+    bg.set("width",  f"{total_w:.2f}")
+    bg.set("height", f"{max_h:.2f}")
     bg.set("fill", bg_color)
 
-    x_offset = PADDING
+    x_offset = 0.0
     for svg_str, w, h in zip(processed, widths, heights):
         hand_elem = ET.fromstring(svg_str)
         hand_elem.set("x",        f"{x_offset:.2f}")
-        hand_elem.set("y",        f"{PADDING:.2f}")
-        hand_elem.set("width",    f"{w:.2f}")      # ← 명시적 크기: 겹침 방지
-        hand_elem.set("height",   f"{h:.2f}")      # ← 명시적 크기: 겹침 방지
-        hand_elem.set("overflow", "visible")       # ← 잘림 방지
+        hand_elem.set("y",        f"{max_h - h:.2f}")  # 아래 정렬
+        hand_elem.set("width",    f"{w:.2f}")           # 겹침 방지
+        hand_elem.set("height",   f"{h:.2f}")           # 겹침 방지
+        hand_elem.set("overflow", "visible")            # 잘림 방지
         root.append(hand_elem)
         x_offset += w + HAND_GAP
 
