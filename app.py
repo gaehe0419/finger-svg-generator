@@ -14,8 +14,6 @@ st.set_page_config(page_title="손가락 이미지 생성기", layout="wide")
 st.title("손가락 이미지 생성기")
 
 # ── 세션 상태 초기화 ──────────────────────────────────────────
-if "mode" not in st.session_state:
-    st.session_state.mode = "숫자 입력"
 if "color" not in st.session_state:
     st.session_state.color = DEFAULT_COLOR
 if "hands" not in st.session_state:
@@ -171,7 +169,11 @@ if st.session_state.hands:
         for h in st.session_state.hands
     ]
 
-    svg_result = build_svg(hands_config, bg_color=bg_hex)
+    try:
+        svg_result = build_svg(hands_config, bg_color=bg_hex)
+    except FileNotFoundError as e:
+        st.error(f"SVG 파일을 찾을 수 없습니다: {e}\ncomponents/ 폴더에 해당 파일이 있는지 확인하세요.")
+        st.stop()
     filename   = make_filename(st.session_state.hands)
 
     st.subheader("미리보기")
