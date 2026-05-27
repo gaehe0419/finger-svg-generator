@@ -39,4 +39,21 @@ for i, (name, hex_val) in enumerate(COLORS.items()):
             st.session_state.color = name
             st.rerun()
 
+# ── 모드 탭 ───────────────────────────────────────────────────
+tab_num, tab_manual = st.tabs(["숫자 입력", "수동 조합"])
+
+# ── 숫자 입력 모드 ────────────────────────────────────────────
+with tab_num:
+    num_input = st.number_input("숫자 (0~20)", min_value=0, max_value=20, value=7, step=1)
+
+    if st.button("생성", key="btn_generate_num"):
+        values = decompose(int(num_input))
+        flips  = default_hand_directions(len(values))
+        variants = [get_variants(v)[0] for v in values]  # 기본 변형 = 첫 번째
+        st.session_state.hands = [
+            {"value": v, "flip": f, "variant": var}
+            for v, f, var in zip(values, flips, variants)
+        ]
+        st.rerun()
+
 st.markdown("---")
