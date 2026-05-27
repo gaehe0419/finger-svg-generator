@@ -143,30 +143,35 @@ def build_svg(
             svg_str = apply_flip(svg_str)
         processed.append(svg_str)
 
-    # Compute per-hand widths to support mixed-dimension SVG files
-    widths = [get_svg_dimensions(s)[0] for s in processed]
-    hand_h = get_svg_dimensions(processed[0])[1]
+    # Compute per-hand dimensions (width + height for every hand)
+    dims = [get_svg_dimensions(s) for s in processed]
+    widths  = [d[0] for d in dims]
+    heights = [d[1] for d in dims]
     total_w = sum(widths) + HAND_GAP * (len(processed) - 1)
+    hand_h  = max(heights)
 
     # Add padding around all hands
     bg_w = total_w + 2 * PADDING
-    bg_h = hand_h + 2 * PADDING
+    bg_h = hand_h  + 2 * PADDING
 
     root = ET.Element(f"{{{SVG_NS}}}svg")
     root.set("viewBox", f"0 0 {bg_w:.2f} {bg_h:.2f}")
-    root.set("width", f"{bg_w:.2f}")
-    root.set("height", f"{bg_h:.2f}")
+    root.set("width",   f"{bg_w:.2f}")
+    root.set("height",  f"{bg_h:.2f}")
 
     bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
-    bg.set("width", f"{bg_w:.2f}")
+    bg.set("width",  f"{bg_w:.2f}")
     bg.set("height", f"{bg_h:.2f}")
     bg.set("fill", bg_color)
 
     x_offset = PADDING
-    for svg_str, w in zip(processed, widths):
+    for svg_str, w, h in zip(processed, widths, heights):
         hand_elem = ET.fromstring(svg_str)
-        hand_elem.set("x", f"{x_offset:.2f}")
-        hand_elem.set("y", f"{PADDING:.2f}")
+        hand_elem.set("x",        f"{x_offset:.2f}")
+        hand_elem.set("y",        f"{PADDING:.2f}")
+        hand_elem.set("width",    f"{w:.2f}")      # ← 명시적 크기: 겹침 방지
+        hand_elem.set("height",   f"{h:.2f}")      # ← 명시적 크기: 겹침 방지
+        hand_elem.set("overflow", "visible")       # ← 잘림 방지
         root.append(hand_elem)
         x_offset += w + HAND_GAP
 
