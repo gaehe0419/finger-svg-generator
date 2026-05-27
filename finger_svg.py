@@ -104,25 +104,32 @@ def build_svg(
     if not hands_config:
         root = ET.Element(f"{{{SVG_NS}}}svg")
         root.set("width", "100")
-        root.set("height", "100")
+        root.set("height", "150")
         bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
         bg.set("width", "100")
-        bg.set("height", "100")
+        bg.set("height", "150")
         bg.set("fill", bg_color)
         return ET.tostring(root, encoding="unicode")
 
     processed = []
     for cfg in hands_config:
         path = os.path.join(components_dir, f"hand_{cfg['value']}_{cfg['variant']}.svg")
-        svg_str = load_svg(path)
-        svg_str = apply_color(svg_str, cfg["color"])
-        if cfg["flip"]:
+        try:
+            svg_str = load_svg(path)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Hand SVG not found: value={cfg['value']}, variant={cfg['variant']} "
+                f"(expected {path})"
+            ) from None
+        svg_str = apply_color(svg_str, cfg.get("color", COLORS[DEFAULT_COLOR]))
+        if cfg.get("flip", False):
             svg_str = apply_flip(svg_str)
         processed.append(svg_str)
 
-    hand_w, hand_h = get_svg_dimensions(processed[0])
-    n = len(processed)
-    total_w = hand_w * n + HAND_GAP * (n - 1)
+    # Compute per-hand widths to support mixed-dimension SVG files
+    widths = [get_svg_dimensions(s)[0] for s in processed]
+    hand_h = get_svg_dimensions(processed[0])[1]
+    total_w = sum(widths) + HAND_GAP * (len(processed) - 1)
 
     root = ET.Element(f"{{{SVG_NS}}}svg")
     root.set("viewBox", f"0 0 {total_w:.2f} {hand_h:.2f}")
@@ -135,13 +142,11 @@ def build_svg(
     bg.set("fill", bg_color)
 
     x_offset = 0.0
-    for svg_str in processed:
+    for svg_str, w in zip(processed, widths):
         hand_elem = ET.fromstring(svg_str)
         hand_elem.set("x", f"{x_offset:.2f}")
         hand_elem.set("y", "0")
-        # Remove redundant xmlns attribute to avoid duplicate when nested in parent SVG
-        hand_elem.attrib.pop("xmlns", None)
         root.append(hand_elem)
-        x_offset += hand_w + HAND_GAP
+        x_offset += w + HAND_GAP
 
     return ET.tostring(root, encoding="unicode")
