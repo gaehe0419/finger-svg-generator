@@ -139,8 +139,8 @@ def test_build_svg_single_hand(comp_dir):
     result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
     assert "<svg" in result
     w, h = fsvg.get_svg_dimensions(result)
-    assert w == 100.0  # 더미 SVG 너비
-    assert h == 150.0
+    assert w == 140.0  # 더미 SVG 너비 (100) + 패딩 (2*20)
+    assert h == 190.0  # 더미 SVG 높이 (150) + 패딩 (2*20)
 
 
 def test_build_svg_two_hands_width(comp_dir):
@@ -151,7 +151,8 @@ def test_build_svg_two_hands_width(comp_dir):
     ]
     result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
     w, _ = fsvg.get_svg_dimensions(result)
-    assert w == 100.0 * 2 + fsvg.HAND_GAP  # 220.0
+    # 너비 = 100*2 + HAND_GAP(20) + 패딩(2*20) = 260.0
+    assert w == 100.0 * 2 + fsvg.HAND_GAP + 2 * fsvg.PADDING
 
 
 def test_build_svg_background_color(comp_dir):

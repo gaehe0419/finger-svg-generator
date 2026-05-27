@@ -12,6 +12,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 COMPONENTS_DIR = "components"
 BASE_HAND_COLOR = "#FFC6BD"  # SVG 파일 수령 후 실제 베이스 fill 색상으로 확정
 HAND_GAP = 20  # 손 사이 간격 (px)
+PADDING = 20  # 이미지 주변 여유 공간 (px)
 
 COLORS = {
     "피부색": "#FFC6BD",
@@ -131,21 +132,25 @@ def build_svg(
     hand_h = get_svg_dimensions(processed[0])[1]
     total_w = sum(widths) + HAND_GAP * (len(processed) - 1)
 
+    # Add padding around all hands
+    bg_w = total_w + 2 * PADDING
+    bg_h = hand_h + 2 * PADDING
+
     root = ET.Element(f"{{{SVG_NS}}}svg")
-    root.set("viewBox", f"0 0 {total_w:.2f} {hand_h:.2f}")
-    root.set("width", f"{total_w:.2f}")
-    root.set("height", f"{hand_h:.2f}")
+    root.set("viewBox", f"0 0 {bg_w:.2f} {bg_h:.2f}")
+    root.set("width", f"{bg_w:.2f}")
+    root.set("height", f"{bg_h:.2f}")
 
     bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
-    bg.set("width", f"{total_w:.2f}")
-    bg.set("height", f"{hand_h:.2f}")
+    bg.set("width", f"{bg_w:.2f}")
+    bg.set("height", f"{bg_h:.2f}")
     bg.set("fill", bg_color)
 
-    x_offset = 0.0
+    x_offset = PADDING
     for svg_str, w in zip(processed, widths):
         hand_elem = ET.fromstring(svg_str)
         hand_elem.set("x", f"{x_offset:.2f}")
-        hand_elem.set("y", "0")
+        hand_elem.set("y", f"{PADDING:.2f}")
         root.append(hand_elem)
         x_offset += w + HAND_GAP
 
