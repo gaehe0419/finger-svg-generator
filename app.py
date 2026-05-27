@@ -199,7 +199,10 @@ with col_right:
         st.subheader("미리보기")
         svg_b64 = base64.b64encode(svg_result.encode("utf-8")).decode()
         st.markdown(
-            f'<img src="data:image/svg+xml;base64,{svg_b64}" style="max-width:100%;height:auto"/>',
+            f'<div style="border:1.5px solid #d0d0d0;border-radius:12px;padding:24px;'
+            f'background:#ffffff;display:inline-block;width:100%;box-sizing:border-box">'
+            f'<img src="data:image/svg+xml;base64,{svg_b64}" style="max-width:100%;height:auto;display:block"/>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
