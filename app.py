@@ -25,20 +25,27 @@ col_left, col_right = st.columns([1, 2], gap="medium")
 # ── [좌측] 색상 선택 ──────────────────────────────────────────
 with col_left:
     st.subheader("색상")
+
+    # 색상 버튼 CSS — 각 버튼 배경을 해당 색상으로 설정
+    _css = "<style>"
+    for _i, (_name, _hex) in enumerate(COLORS.items()):
+        _sel = st.session_state.color == _name
+        _border = "3px solid #333333" if _sel else "1px solid #cccccc"
+        _tc = "#2F424E" if _hex == "#FFFFFF" else "#333333"
+        _css += (
+            f'[data-testid="stColumn"]:has([data-cbtn="{_i}"]) button {{'
+            f'background-color:{_hex}!important;border:{_border}!important;'
+            f'color:{_tc}!important;font-weight:600!important;'
+            f'min-height:52px!important;width:100%!important;border-radius:8px!important;}}'
+        )
+    _css += "</style>"
+    st.markdown(_css, unsafe_allow_html=True)
+
     color_cols = st.columns(len(COLORS))
     for i, (name, hex_val) in enumerate(COLORS.items()):
         with color_cols[i]:
-            border = "3px solid #333" if st.session_state.color == name else "1px solid #ccc"
-            st.markdown(
-                f'<div style="width:50px;height:50px;background:{hex_val};border:{border};'
-                f'border-radius:8px;cursor:pointer;margin:auto;transition:all 0.2s" '
-                f'onclick="document.getElementById(\'color_{name}_btn\').click()" '
-                f'onmouseover="this.style.boxShadow=\'0 0 8px rgba(0,0,0,0.2)\'" '
-                f'onmouseout="this.style.boxShadow=\'none\'">'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            if st.button(name, key=f"color_{name}"):
+            st.markdown(f'<span data-cbtn="{i}" style="display:none"></span>', unsafe_allow_html=True)
+            if st.button(name, key=f"color_{name}", use_container_width=True):
                 st.session_state.color = name
                 st.rerun()
 
@@ -98,14 +105,8 @@ with col_left:
         for i, hand in enumerate(st.session_state.hands):
             st.markdown(f"**{i+1}번 손**")
 
-            # 방향 토글 (checkbox)
-            dir_label = "오른손" if hand["flip"] else "왼손"
-            new_flip = st.checkbox(
-                label=f"방향: {dir_label}",
-                value=hand["flip"],
-                key=f"flip_{i}",
-                label_visibility="collapsed"
-            )
+            # 방향 토글 (ON = 오른손, OFF = 왼손)
+            new_flip = st.toggle("오른손", value=hand["flip"], key=f"flip_{i}")
             if new_flip != hand["flip"]:
                 st.session_state.hands[i]["flip"] = new_flip
                 st.rerun()
