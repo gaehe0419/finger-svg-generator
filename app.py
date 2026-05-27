@@ -1,8 +1,8 @@
 # app.py
-import base64
-import datetime
+import base64          # used in Task 10: PNG download via Canvas API
+import datetime        # used in Task 10: auto-generated filename
 import streamlit as st
-import streamlit.components.v1 as components
+import streamlit.components.v1 as components  # used in Task 10: inject PNG download JS
 
 from finger_svg import (
     COLORS, BG_COLORS, DEFAULT_COLOR,
@@ -25,6 +25,7 @@ if "hands" not in st.session_state:
 
 
 # ── 색상 선택 ─────────────────────────────────────────────────
+# 선택된 색상은 전체 손에 일괄 적용. 흰색 선택 시 미리보기 배경 → BG_COLORS["흰색"] = "#2F424E"
 st.subheader("색상")
 color_cols = st.columns(len(COLORS))
 for i, (name, hex_val) in enumerate(COLORS.items()):
