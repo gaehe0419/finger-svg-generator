@@ -131,3 +131,44 @@ def test_default_hand_directions():
     assert fsvg.default_hand_directions(1) == [True]           # 오른손
     assert fsvg.default_hand_directions(2) == [True, False]    # 오른, 왼
     assert fsvg.default_hand_directions(4) == [True, False, True, False]
+
+
+def test_build_svg_single_hand(comp_dir):
+    fsvg = reload_module(comp_dir)
+    config = [{"value": 3, "variant": "a", "color": "#FFC6BD", "flip": False}]
+    result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
+    assert "<svg" in result
+    w, h = fsvg.get_svg_dimensions(result)
+    assert w == 100.0  # 더미 SVG 너비
+    assert h == 150.0
+
+
+def test_build_svg_two_hands_width(comp_dir):
+    fsvg = reload_module(comp_dir)
+    config = [
+        {"value": 5, "variant": "a", "color": "#FFC6BD", "flip": True},
+        {"value": 2, "variant": "a", "color": "#FFC6BD", "flip": False},
+    ]
+    result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
+    w, _ = fsvg.get_svg_dimensions(result)
+    assert w == 100.0 * 2 + fsvg.HAND_GAP  # 220.0
+
+
+def test_build_svg_background_color(comp_dir):
+    fsvg = reload_module(comp_dir)
+    config = [{"value": 0, "variant": "a", "color": "#FFFFFF", "flip": False}]
+    result = fsvg.build_svg(config, bg_color="#2F424E", components_dir=comp_dir)
+    assert "#2F424E" in result
+
+
+def test_build_svg_color_applied(comp_dir):
+    fsvg = reload_module(comp_dir)
+    config = [{"value": 1, "variant": "a", "color": "#FF6666", "flip": False}]
+    result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
+    assert "#FF6666" in result
+
+
+def test_build_svg_empty_returns_placeholder(comp_dir):
+    fsvg = reload_module(comp_dir)
+    result = fsvg.build_svg([], bg_color="#FFFFFF", components_dir=comp_dir)
+    assert "<svg" in result

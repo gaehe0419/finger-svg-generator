@@ -89,3 +89,59 @@ def decompose(n: int) -> list[int]:
 def default_hand_directions(count: int) -> list[bool]:
     """Generate default hand directions: even indices → True (right/flip), odd → False (left)."""
     return [i % 2 == 0 for i in range(count)]
+
+
+def build_svg(
+    hands_config: list[dict],
+    bg_color: str = "#FFFFFF",
+    components_dir: str = COMPONENTS_DIR,
+) -> str:
+    """
+    Assemble a single SVG from one or more hand configs placed side by side.
+    hands_config: list of {"value": int, "variant": str, "color": str, "flip": bool}
+    Returns SVG string.
+    """
+    if not hands_config:
+        root = ET.Element(f"{{{SVG_NS}}}svg")
+        root.set("width", "100")
+        root.set("height", "100")
+        bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
+        bg.set("width", "100")
+        bg.set("height", "100")
+        bg.set("fill", bg_color)
+        return ET.tostring(root, encoding="unicode")
+
+    processed = []
+    for cfg in hands_config:
+        path = os.path.join(components_dir, f"hand_{cfg['value']}_{cfg['variant']}.svg")
+        svg_str = load_svg(path)
+        svg_str = apply_color(svg_str, cfg["color"])
+        if cfg["flip"]:
+            svg_str = apply_flip(svg_str)
+        processed.append(svg_str)
+
+    hand_w, hand_h = get_svg_dimensions(processed[0])
+    n = len(processed)
+    total_w = hand_w * n + HAND_GAP * (n - 1)
+
+    root = ET.Element(f"{{{SVG_NS}}}svg")
+    root.set("viewBox", f"0 0 {total_w:.2f} {hand_h:.2f}")
+    root.set("width", f"{total_w:.2f}")
+    root.set("height", f"{hand_h:.2f}")
+
+    bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
+    bg.set("width", f"{total_w:.2f}")
+    bg.set("height", f"{hand_h:.2f}")
+    bg.set("fill", bg_color)
+
+    x_offset = 0.0
+    for svg_str in processed:
+        hand_elem = ET.fromstring(svg_str)
+        hand_elem.set("x", f"{x_offset:.2f}")
+        hand_elem.set("y", "0")
+        # Remove redundant xmlns attribute to avoid duplicate when nested in parent SVG
+        hand_elem.attrib.pop("xmlns", None)
+        root.append(hand_elem)
+        x_offset += hand_w + HAND_GAP
+
+    return ET.tostring(root, encoding="unicode")
