@@ -62,7 +62,7 @@ with tab_manual:
         if st.button("＋ 손 추가", key="btn_add_hand"):
             idx = len(st.session_state.hands)
             flip = (idx % 2 == 0)
-            st.session_state.hands.append({"value": 0, "flip": flip, "variant": "a"})
+            st.session_state.hands.append({"value": 0, "flip": flip, "variant": get_variants(0)[0]})
             st.rerun()
     with col_remove:
         if st.button("－ 손 제거", key="btn_remove_hand", disabled=len(st.session_state.hands) == 0):
@@ -74,7 +74,7 @@ with tab_manual:
             f"{i+1}번 손 손가락 수",
             min_value=0, max_value=5,
             value=hand["value"],
-            key=f"slider_{i}",
+            key=f"manual_slider_{i}",
         )
         if new_val != hand["value"]:
             # 값이 바뀌면 변형도 해당 숫자의 첫 번째로 리셋
