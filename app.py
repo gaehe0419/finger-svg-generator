@@ -110,9 +110,11 @@ if st.session_state.hands:
                             bg_color="#F5F5F5",
                         )
                         border = "2px solid #333" if variant == hand["variant"] else "1px solid #ddd"
+                        thumb_b64 = base64.b64encode(thumb_svg.encode("utf-8")).decode()
                         st.markdown(
                             f'<div style="border:{border};border-radius:4px;padding:2px;max-width:70px;overflow:hidden">'
-                            f'{thumb_svg}</div>',
+                            f'<img src="data:image/svg+xml;base64,{thumb_b64}" style="width:100%;height:auto"/>'
+                            f'</div>',
                             unsafe_allow_html=True,
                         )
                         if st.button(f"{'✓' if variant == hand['variant'] else '  '}", key=f"var_{i}_{j}"):
@@ -177,7 +179,11 @@ if st.session_state.hands:
     filename   = make_filename(st.session_state.hands)
 
     st.subheader("미리보기")
-    st.markdown(svg_result, unsafe_allow_html=True)
+    svg_b64 = base64.b64encode(svg_result.encode("utf-8")).decode()
+    st.markdown(
+        f'<img src="data:image/svg+xml;base64,{svg_b64}" style="max-width:100%;height:auto"/>',
+        unsafe_allow_html=True,
+    )
 
     dl_col1, dl_col2 = st.columns([1, 1])
     with dl_col1:
