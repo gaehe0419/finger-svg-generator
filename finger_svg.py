@@ -10,7 +10,8 @@ ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
 
 SVG_NS = "http://www.w3.org/2000/svg"
 COMPONENTS_DIR = "components"
-BASE_HAND_COLOR = "#FFC6BD"  # SVG 파일 수령 후 실제 베이스 fill 색상으로 확정
+BASE_HAND_COLOR   = "#FFC6BD"  # 손 메인 색상 (cls-1)
+BASE_SHADOW_COLOR = "#f9897a"  # 손 그림자 색상 (cls-2)
 HAND_GAP = 20  # 손 사이 간격 (px)
 PADDING = 20  # 이미지 주변 여유 공간 (px)
 
@@ -20,6 +21,14 @@ COLORS = {
     "깨다":   "#FF6666",
     "챌리":   "#FFDC0B",
     "따미":   "#26C9CB",
+}
+
+SHADOW_COLORS = {
+    "피부색": "#f9897a",
+    "흰색":   "#b3b3b3",
+    "깨다":   "#d54141",
+    "챌리":   "#edaf00",
+    "따미":   "#008f8b",
 }
 
 BG_COLORS = {name: "#FFFFFF" for name in COLORS}
@@ -59,6 +68,11 @@ def get_svg_dimensions(svg_str: str) -> tuple[float, float]:
 def apply_color(svg_str: str, target_color: str) -> str:
     pattern = re.compile(re.escape(BASE_HAND_COLOR), re.IGNORECASE)
     return pattern.sub(target_color, svg_str)
+
+
+def apply_shadow(svg_str: str, shadow_color: str) -> str:
+    pattern = re.compile(re.escape(BASE_SHADOW_COLOR), re.IGNORECASE)
+    return pattern.sub(shadow_color, svg_str)
 
 
 def apply_flip(svg_str: str) -> str:
@@ -123,6 +137,8 @@ def build_svg(
                 f"(expected {path})"
             ) from None
         svg_str = apply_color(svg_str, cfg.get("color", COLORS[DEFAULT_COLOR]))
+        if cfg.get("shadow"):
+            svg_str = apply_shadow(svg_str, cfg["shadow"])
         if cfg.get("flip", False):
             svg_str = apply_flip(svg_str)
         processed.append(svg_str)

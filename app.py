@@ -4,7 +4,7 @@ import datetime
 import streamlit as st
 
 from finger_svg import (
-    COLORS, BG_COLORS, DEFAULT_COLOR,
+    COLORS, SHADOW_COLORS, BG_COLORS, DEFAULT_COLOR,
     get_variants, decompose, default_hand_directions, build_svg,
 )
 
@@ -119,7 +119,9 @@ with col_left:
                     with thumb_cols[j]:
                         thumb_svg = build_svg(
                             [{"value": hand["value"], "variant": variant,
-                              "color": color_hex, "flip": hand["flip"]}],
+                              "color": color_hex,
+                              "shadow": SHADOW_COLORS[st.session_state.color],
+                              "flip": hand["flip"]}],
                             bg_color="#F5F5F5",
                         )
                         border = "2px solid #333" if variant == hand["variant"] else "1px solid #ddd"
@@ -179,9 +181,10 @@ with col_right:
         color_hex = COLORS[st.session_state.color]
         bg_hex = BG_COLORS[st.session_state.color]
 
+        shadow_hex = SHADOW_COLORS[st.session_state.color]
         hands_config = [
             {"value": h["value"], "variant": h["variant"],
-             "color": color_hex, "flip": h["flip"]}
+             "color": color_hex, "shadow": shadow_hex, "flip": h["flip"]}
             for h in st.session_state.hands
         ]
 
