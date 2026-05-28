@@ -36,8 +36,13 @@ with col_left:
         "따미":   "#ffffff",
     }
     _css = "<style>"
-    # 버튼 행 gap 16px
-    _css += ".stHorizontalBlock:has(.st-key-color_0) { gap: 16px !important; }"
+    # 버튼 행: gap 16px, 컬럼이 flex:1 균등분할되지 않도록 auto로 override
+    _css += (
+        ".stHorizontalBlock:has(.st-key-color_0) {"
+        "  gap: 16px !important; flex-wrap: wrap !important; }"
+        ".stHorizontalBlock:has(.st-key-color_0) > [data-testid='stColumn'] {"
+        "  flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }"
+    )
     for _i, (_name, _hex) in enumerate(COLORS.items()):
         _sel    = st.session_state.color == _name
         _shadow = SHADOW_COLORS[_name]                          # 활성 테두리 = shadow color
