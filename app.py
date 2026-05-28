@@ -50,13 +50,13 @@ with col_left:
         _sel    = st.session_state.color == _name
         _shadow = SHADOW_COLORS[_name]                          # 활성 테두리 = shadow color
         _border  = f"2px solid {_shadow}" if _sel else "1.5px solid #dddddd"
-        _opacity = "1" if _sel else "0.5"
+        _glow    = f"0 0 0 3px {_shadow}60" if _sel else "none"
         _tc      = _TEXT_COLOR[_name]
         _css += (
             f'.st-key-color_{_i} button {{'
             f'background-color:{_hex}!important;border:{_border}!important;'
             f'color:{_tc}!important;font-weight:700!important;'
-            f'opacity:{_opacity}!important;'
+            f'box-shadow:{_glow}!important;'
             f'min-height:44px!important;'
             f'padding:8px 0!important;border-radius:50px!important;}}'
         )
