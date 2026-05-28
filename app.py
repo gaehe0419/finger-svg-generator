@@ -36,27 +36,28 @@ with col_left:
         "따미":   "#ffffff",
     }
     _css = "<style>"
-    # 버튼 행: gap 16px, 컬럼이 flex:1 균등분할되지 않도록 auto로 override
+    # 버튼 행: gap 8px, 컬럼이 flex:1 균등분할되지 않도록 auto로 override
     _css += (
         ".stHorizontalBlock:has(.st-key-color_0) {"
-        "  gap: 16px !important; flex-wrap: wrap !important; }"
+        "  gap: 8px !important; flex-wrap: wrap !important; }"
         ".stHorizontalBlock:has(.st-key-color_0) > [data-testid='stColumn'] {"
         "  flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }"
         # 모든 색상 버튼 공통 크기 — 가장 긴 텍스트(피부색 3자)에 맞춰 고정
         ".stHorizontalBlock:has(.st-key-color_0) button {"
-        "  width: 88px !important; }"
+        "  width: 80px !important; }"
     )
     for _i, (_name, _hex) in enumerate(COLORS.items()):
         _sel    = st.session_state.color == _name
         _shadow = SHADOW_COLORS[_name]                          # 활성 테두리 = shadow color
-        _border = f"3px solid {_shadow}" if _sel else "1.5px solid #dddddd"
+        _border = f"2px solid {_shadow}" if _sel else "1.5px solid #dddddd"
+        _bg     = _shadow if _sel else _hex
         _tc     = _TEXT_COLOR[_name]
         _css += (
             f'.st-key-color_{_i} button {{'
-            f'background-color:{_hex}!important;border:{_border}!important;'
+            f'background-color:{_bg}!important;border:{_border}!important;'
             f'color:{_tc}!important;font-weight:700!important;'
             f'min-height:44px!important;'
-            f'padding:8px 0!important;border-radius:8px!important;}}'  # padding 좌우 0 (width 고정이므로)
+            f'padding:8px 0!important;border-radius:50px!important;}}'  # padding 좌우 0 (width 고정이므로)
         )
     _css += "</style>"
     st.markdown(_css, unsafe_allow_html=True)
