@@ -49,14 +49,16 @@ with col_left:
     for _i, (_name, _hex) in enumerate(COLORS.items()):
         _sel    = st.session_state.color == _name
         _shadow = SHADOW_COLORS[_name]                          # 활성 테두리 = shadow color
-        _border = f"2px solid {_shadow}" if _sel else "1.5px solid #dddddd"
-        _tc     = _TEXT_COLOR[_name]
+        _border  = f"2px solid {_shadow}" if _sel else "1.5px solid #dddddd"
+        _opacity = "1" if _sel else "0.5"
+        _tc      = _TEXT_COLOR[_name]
         _css += (
             f'.st-key-color_{_i} button {{'
             f'background-color:{_hex}!important;border:{_border}!important;'
             f'color:{_tc}!important;font-weight:700!important;'
+            f'opacity:{_opacity}!important;'
             f'min-height:44px!important;'
-            f'padding:8px 0!important;border-radius:50px!important;}}'  # padding 좌우 0 (width 고정이므로)
+            f'padding:8px 0!important;border-radius:50px!important;}}'
         )
     _css += "</style>"
     st.markdown(_css, unsafe_allow_html=True)
