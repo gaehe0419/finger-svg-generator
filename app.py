@@ -42,6 +42,9 @@ with col_left:
         "  gap: 16px !important; flex-wrap: wrap !important; }"
         ".stHorizontalBlock:has(.st-key-color_0) > [data-testid='stColumn'] {"
         "  flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }"
+        # 모든 색상 버튼 공통 크기 — 가장 긴 텍스트(피부색 3자)에 맞춰 고정
+        ".stHorizontalBlock:has(.st-key-color_0) button {"
+        "  width: 88px !important; }"
     )
     for _i, (_name, _hex) in enumerate(COLORS.items()):
         _sel    = st.session_state.color == _name
@@ -52,8 +55,8 @@ with col_left:
             f'.st-key-color_{_i} button {{'
             f'background-color:{_hex}!important;border:{_border}!important;'
             f'color:{_tc}!important;font-weight:700!important;'
-            f'min-height:44px!important;width:auto!important;'   # 가변 너비
-            f'padding:8px 18px!important;border-radius:8px!important;}}'
+            f'min-height:44px!important;'
+            f'padding:8px 0!important;border-radius:8px!important;}}'  # padding 좌우 0 (width 고정이므로)
         )
     _css += "</style>"
     st.markdown(_css, unsafe_allow_html=True)
