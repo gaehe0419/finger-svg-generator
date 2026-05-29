@@ -128,9 +128,10 @@ def test_decompose_three_four_hands():
 
 def test_default_hand_directions():
     fsvg = reload_module("components")
-    assert fsvg.default_hand_directions(1) == [True]           # 오른손
-    assert fsvg.default_hand_directions(2) == [True, False]    # 오른, 왼
-    assert fsvg.default_hand_directions(4) == [True, False, True, False]
+    assert fsvg.default_hand_directions(1) == [True]                        # 오른손
+    assert fsvg.default_hand_directions(2) == [False, True]                 # 왼→오른
+    assert fsvg.default_hand_directions(3) == [False, True, False]          # 왼→오른→왼
+    assert fsvg.default_hand_directions(4) == [False, True, False, True]    # 왼→오른→왼→오른
 
 
 def test_build_svg_single_hand(comp_dir):
@@ -139,8 +140,8 @@ def test_build_svg_single_hand(comp_dir):
     result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
     assert "<svg" in result
     w, h = fsvg.get_svg_dimensions(result)
-    assert w == 100.0  # 더미 SVG 너비 (패딩 없음)
-    assert h == 150.0  # 더미 SVG 높이 (패딩 없음)
+    assert w == 100.0 + fsvg.CANVAS_PAD * 2
+    assert h == 150.0 + fsvg.CANVAS_PAD * 2
 
 
 def test_build_svg_two_hands_width(comp_dir):
@@ -151,8 +152,8 @@ def test_build_svg_two_hands_width(comp_dir):
     ]
     result = fsvg.build_svg(config, bg_color="#FFFFFF", components_dir=comp_dir)
     w, _ = fsvg.get_svg_dimensions(result)
-    # 너비 = 100*2 + HAND_GAP(40), 패딩 없음
-    assert w == 100.0 * 2 + fsvg.HAND_GAP
+    # 너비 = 100*2 + HAND_GAP(40) + CANVAS_PAD*2
+    assert w == 100.0 * 2 + fsvg.HAND_GAP + fsvg.CANVAS_PAD * 2
 
 
 def test_build_svg_background_color(comp_dir):

@@ -1,4 +1,5 @@
 # finger_svg.py
+import base64
 import os
 import re
 import glob
@@ -12,7 +13,8 @@ SVG_NS = "http://www.w3.org/2000/svg"
 COMPONENTS_DIR = "components"
 BASE_HAND_COLOR   = "#FFC6BD"  # 손 메인 색상 (cls-1)
 BASE_SHADOW_COLOR = "#f9897a"  # 손 그림자 색상 (cls-2)
-HAND_GAP = 40  # 손 사이 간격 (px)
+HAND_GAP   = 40  # 손 사이 간격 (px)
+CANVAS_PAD = 16  # 잘림 방지용 캔버스 여백 (px)
 
 COLORS = {
     "피부색": "#FFC6BD",
@@ -101,14 +103,20 @@ def decompose(n: int) -> list[int]:
 
 
 def default_hand_directions(count: int) -> list[bool]:
-    """Generate default hand directions: even indices → True (right/flip), odd → False (left)."""
-    return [i % 2 == 0 for i in range(count)]
+    """Generate default hand directions.
+    1손  → [True]           (오른손)
+    2손+ → [False, True, False, True, ...]  (왼→오른→왼→오른...)
+    """
+    if count == 1:
+        return [True]
+    return [i % 2 == 1 for i in range(count)]
 
 
 def build_svg(
     hands_config: list[dict],
     bg_color: str = "#FFFFFF",
     components_dir: str = COMPONENTS_DIR,
+    hand_gap: int = HAND_GAP,
 ) -> str:
     """
     Assemble a single SVG from one or more hand configs placed side by side.
@@ -146,29 +154,33 @@ def build_svg(
     dims = [get_svg_dimensions(s) for s in processed]
     widths  = [d[0] for d in dims]
     heights = [d[1] for d in dims]
-    total_w = sum(widths) + HAND_GAP * (len(processed) - 1)
+    total_w = sum(widths) + hand_gap * (len(processed) - 1)
     max_h   = max(heights)
 
-    # 여백 없이 타이트한 캔버스
+    # 잘림 방지 패딩 포함 캔버스
+    canvas_w = total_w + CANVAS_PAD * 2
+    canvas_h = max_h  + CANVAS_PAD * 2
+
     root = ET.Element(f"{{{SVG_NS}}}svg")
-    root.set("viewBox", f"0 0 {total_w:.2f} {max_h:.2f}")
-    root.set("width",   f"{total_w:.2f}")
-    root.set("height",  f"{max_h:.2f}")
+    root.set("viewBox", f"0 0 {canvas_w:.2f} {canvas_h:.2f}")
+    root.set("width",   f"{canvas_w:.2f}")
+    root.set("height",  f"{canvas_h:.2f}")
 
     bg = ET.SubElement(root, f"{{{SVG_NS}}}rect")
-    bg.set("width",  f"{total_w:.2f}")
-    bg.set("height", f"{max_h:.2f}")
+    bg.set("width",  f"{canvas_w:.2f}")
+    bg.set("height", f"{canvas_h:.2f}")
     bg.set("fill", bg_color)
 
-    x_offset = 0.0
+    # 각 손 SVG를 <image> 요소로 임베드 — CSS 클래스명 충돌 완전 차단
+    x_offset = float(CANVAS_PAD)
     for svg_str, w, h in zip(processed, widths, heights):
-        hand_elem = ET.fromstring(svg_str)
-        hand_elem.set("x",        f"{x_offset:.2f}")
-        hand_elem.set("y",        f"{max_h - h:.2f}")  # 아래 정렬
-        hand_elem.set("width",    f"{w:.2f}")           # 겹침 방지
-        hand_elem.set("height",   f"{h:.2f}")           # 겹침 방지
-        hand_elem.set("overflow", "visible")            # 잘림 방지
-        root.append(hand_elem)
-        x_offset += w + HAND_GAP
+        b64 = base64.b64encode(svg_str.encode("utf-8")).decode("ascii")
+        img_elem = ET.SubElement(root, f"{{{SVG_NS}}}image")
+        img_elem.set("x",      f"{x_offset:.2f}")
+        img_elem.set("y",      f"{CANVAS_PAD + max_h - h:.2f}")  # 여백 + 아래 정렬
+        img_elem.set("width",  f"{w:.2f}")
+        img_elem.set("height", f"{h:.2f}")
+        img_elem.set("href",   f"data:image/svg+xml;base64,{b64}")
+        x_offset += w + hand_gap
 
     return ET.tostring(root, encoding="unicode")
